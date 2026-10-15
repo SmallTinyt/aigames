@@ -12,7 +12,7 @@
   'use strict';
 
   const MAX_REWIND_SECONDS = 5.0; // 最多可倒流 5 秒
-  const FPS = 30;
+  const FPS = 60;
   const DT = 1 / FPS;
   const MAX_HISTORY_FRAMES = Math.round(MAX_REWIND_SECONDS * FPS); // 300 幀
 
@@ -474,7 +474,7 @@
         this.levelTime += dt;
 
         // 常態指針滴答聲 (每秒 1 次)
-        if (this.levelTime - this.lastTickTime >= 1.0) {
+        if (this.levelTime - this.lastTickTime >= 2.0) {
           this.lastTickTime = this.levelTime;
           EC.Sound.playTick();
         }
