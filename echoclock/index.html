@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《回聲時鐘》Echo Clock — 蒸氣龐克時空解謎平台遊戲</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 遊戲主容器 -->
+  <div id="game-wrapper">
+    <!-- 四角黃銅齒輪裝飾 -->
+    <div class="gear-corner gear-tl"></div>
+    <div class="gear-corner gear-tr"></div>
+    <div class="gear-corner gear-bl"></div>
+    <div class="gear-corner gear-br"></div>
+
+    <!-- 遊戲 Canvas 畫布 (960 x 512 像素，30 列 x 16 行格線) -->
+    <canvas id="game-canvas" width="960" height="512"></canvas>
+
+    <!-- 頂部 HUD 資訊列 -->
+    <div id="hud-container">
+      <div class="hud-left">
+        <div class="hud-badge" id="hud-level-num">關卡 1</div>
+        <div class="hud-badge" id="hud-time">⏱️ 0.0s</div>
+        <div class="hud-badge" id="hud-steps">👟 0</div>
+        <div class="hud-badge" id="hud-echoes">👥 回聲: 0</div>
+      </div>
+
+      <!-- 中央沙漏計量條 -->
+      <div class="hourglass-box">
+        <div class="hourglass-title">⏳ 逆流沙漏 (按住 R 倒流)</div>
+        <div class="hourglass-meter-frame">
+          <div id="hourglass-fill" class="hourglass-fill"></div>
+        </div>
+      </div>
+
+      <!-- 右側快捷按鈕 -->
+      <div class="hud-right">
+        <button id="hud-btn-clear-echo" class="btn-brass small" title="清除所有回聲分身 (C)">🧹 清除回聲 [C]</button>
+        <button id="hud-btn-restart" class="btn-brass small" title="重啟本關 (T)">🔄 重試 [T]</button>
+        <button id="hud-btn-mute" class="btn-brass small">🔊 音效</button>
+        <button id="hud-btn-pause" class="btn-brass small" title="暫停 (ESC)">⏸️ 暫停</button>
+      </div>
+    </div>
+
+    <!-- 底部關卡提示列 -->
+    <div id="level-hint-bar">載入提示中...</div>
+
+    <!-- 主選單畫面 -->
+    <div id="menu-screen" class="screen-overlay active">
+      <div class="modal-box">
+        <div class="title-huge">回聲時鐘</div>
+        <div class="subtitle">ECHO CLOCK — 鐘樓時空逃脫錄</div>
+        <p>
+          「鐘樓的指針停擺了，唯有過去的你，能與現在的你一同解開時間之鎖。」<br>
+          操控鐘錶匠學徒，利用時間倒流凝結回聲分身，逃出這座巨大的蒸氣時鐘！
+        </p>
+
+        <div class="menu-buttons" style="margin: 0 auto;">
+          <button id="btn-play" class="btn-brass">▶ 開始冒險</button>
+          <button id="btn-level-select" class="btn-brass">📜 選擇關卡 (30關)</button>
+        </div>
+
+        <div class="control-guide-box">
+          <div><span class="key-badge">A</span> <span class="key-badge">D</span> 或 <span class="key-badge">←</span> <span class="key-badge">→</span> 移動</div>
+          <div><span class="key-badge">空白鍵</span> 跳躍</div>
+          <div>按住 <span class="key-badge">R</span> 時間倒流</div>
+          <div><span class="key-badge">C</span> 清除分身</div>
+          <div><span class="key-badge">ESC</span> 暫停</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 關卡選擇畫面 -->
+    <div id="level-select-screen" class="screen-overlay">
+      <div class="modal-box">
+        <h2>鐘樓迴廊 — 關卡選擇</h2>
+        <p>通過關卡解鎖後續齒輪謎題，達成三星挑戰目標！</p>
+        
+        <div id="level-grid" class="level-grid">
+          <!-- 30 關卡由 JS 動態生成 -->
+        </div>
+
+        <div>
+          <button id="btn-back-menu" class="btn-brass">返回主選單</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 暫停選單畫面 -->
+    <div id="pause-screen" class="screen-overlay">
+      <div class="modal-box">
+        <h2>時間暫停</h2>
+        <p>齒輪暫時靜止，稍作喘息。</p>
+        <div class="menu-buttons" style="margin: 0 auto;">
+          <button id="btn-resume" class="btn-brass">繼續遊戲</button>
+          <button id="btn-restart-pause" class="btn-brass">重新挑戰本關</button>
+          <button id="btn-pause-menu" class="btn-brass">返回主選單</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 通關勝利畫面 -->
+    <div id="win-screen" class="screen-overlay">
+      <div class="modal-box">
+        <h2>齒輪轉動！順利通關</h2>
+        <div id="win-stars" class="win-stars">★★★</div>
+        <div class="win-stats">
+          <div class="stat-item">
+            <span class="stat-label">通關用時</span>
+            <span id="win-time" class="stat-val">0.0 秒</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">移動步數</span>
+            <span id="win-steps" class="stat-val">0 步</span>
+          </div>
+        </div>
+        <div class="menu-buttons" style="margin: 0 auto; flex-direction: row; width: auto;">
+          <button id="btn-next-level" class="btn-brass">下一關 ⏭️</button>
+          <button id="btn-replay-level" class="btn-brass">再玩一次 🔄</button>
+          <button id="btn-win-menu" class="btn-brass">關卡列表 📜</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 引入遊戲模組 (順序：資料 -> 音效 -> 物理 -> 繪圖 -> 主邏輯) -->
+  <script src="js/levels.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/game.js"></script>
+
+</body>
+</html>
