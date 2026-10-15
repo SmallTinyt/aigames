@@ -12,7 +12,7 @@
   'use strict';
 
   const MAX_REWIND_SECONDS = 5.0; // 最多可倒流 5 秒
-  const FPS = 60;
+  const FPS = 30;
   const DT = 1 / FPS;
   const MAX_HISTORY_FRAMES = Math.round(MAX_REWIND_SECONDS * FPS); // 300 幀
 
